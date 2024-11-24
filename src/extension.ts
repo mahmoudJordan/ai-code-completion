@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { fetchOpenAICompletion, fetchCodeForComment } from './open-ai'; // Import OpenAI API logic
 
-// Inline Completion Provider
 class GPTInlineCompletionProvider implements vscode.InlineCompletionItemProvider {
     private suggestionActive = false; // Tracks if a suggestion is currently active
 
@@ -12,9 +11,8 @@ class GPTInlineCompletionProvider implements vscode.InlineCompletionItemProvider
         token: vscode.CancellationToken
     ): Promise<vscode.InlineCompletionList> {
         const textBeforeCursor = document.getText(new vscode.Range(new vscode.Position(0, 0), position));
-        const currentLine = document.lineAt(position.line).text.trim();
 
-        // Old behavior: Suggestion triggered manually with Alt + S
+        // Only trigger if manually invoked or programmatically required
         if (!this.suggestionActive && context.triggerKind === vscode.InlineCompletionTriggerKind.Invoke) {
             console.log('Providing inline completion suggestions...');
             this.suggestionActive = true; // Mark suggestion as active
@@ -23,13 +21,17 @@ class GPTInlineCompletionProvider implements vscode.InlineCompletionItemProvider
                 // Fetch suggestion from OpenAI
                 const suggestion = await fetchOpenAICompletion(textBeforeCursor);
 
-                // Create an inline completion item
-                const completionItem = new vscode.InlineCompletionItem(suggestion);
-                completionItem.insertText = suggestion;
+                // Trim and align the suggestion
+                const trimmedSuggestion = suggestion.trimStart();
+
+                // Create and return an inline completion item
+                const completionItem = new vscode.InlineCompletionItem(trimmedSuggestion);
+
+                // Ensure the range starts exactly at the cursor position
                 completionItem.range = new vscode.Range(position, position);
 
                 return new vscode.InlineCompletionList([completionItem]);
-            } catch (error: any) {
+            } catch (error) {
                 console.error('Error fetching completion:', error);
                 return new vscode.InlineCompletionList([]);
             } finally {
@@ -37,7 +39,6 @@ class GPTInlineCompletionProvider implements vscode.InlineCompletionItemProvider
             }
         }
 
-        console.log('No suggestion triggered.');
         return new vscode.InlineCompletionList([]); // No suggestions
     }
 
@@ -60,38 +61,40 @@ export function activate(context: vscode.ExtensionContext) {
     const onCommentCompleteListener = vscode.workspace.onDidChangeTextDocument(async (event) => {
         const editor = vscode.window.activeTextEditor;
         if (!editor || editor.document !== event.document) return;
-    
-        // Get the current line where the user pressed Enter
+
         const position = editor.selection.active;
-        const currentLine = editor.document.lineAt(position.line).text.trim();
-    
-        // Check if the previous line contains a comment
-        const previousLine = position.line > 0 ? editor.document.lineAt(position.line - 1).text.trim() : '';
+        const previousLine = position.line > 0 ? editor.document.lineAt(position.line).text.trim() : '';
         const isSingleLineComment = previousLine.startsWith('//') || previousLine.startsWith('#');
         const isMultiLineCommentClosed = previousLine.endsWith('*/');
-    
+
         if (isSingleLineComment || isMultiLineCommentClosed) {
             console.log(`Comment detected: "${previousLine}", fetching suggestion...`);
-    
+
             try {
-                // Fetch suggestion based on the comment
-                const suggestion = await fetchCodeForComment(previousLine);
-    
-                // Insert the suggestion below the comment
-                const insertPosition = new vscode.Position(position.line, 0);
-                await editor.edit((editBuilder) => {
-                    editBuilder.insert(insertPosition, suggestion + '\n');
-                });
-    
-                console.log('Suggestion successfully inserted.');
-            } catch (error: any) {
+                const codeBeforeComment = editor.document.getText(
+                    new vscode.Range(new vscode.Position(0, 0), new vscode.Position(position.line, 0))
+                );
+
+                // Fetch suggestion based on the comment and the context
+                const suggestion = await fetchCodeForComment(previousLine, codeBeforeComment);
+
+                // Trim and align the suggestion
+                const trimmedSuggestion = suggestion.trimStart();
+
+                // Trigger inline suggestion explicitly
+                const completionItem = new vscode.InlineCompletionItem(trimmedSuggestion);
+                completionItem.range = new vscode.Range(position, position);
+
+                // Register inline completion
+                await vscode.commands.executeCommand('editor.action.inlineSuggest.trigger');
+
+                console.log('Suggestion successfully displayed.');
+            } catch (error) {
                 console.error('Error fetching suggestion for comment:', error);
             }
         }
     });
-    
 
-    // Register Command to Trigger Inline Suggestions (Alt + S)
     const manualSuggestionCommand = vscode.commands.registerCommand('extension.triggerInlineSuggestion', () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -107,5 +110,4 @@ export function activate(context: vscode.ExtensionContext) {
     console.log('Inline completion provider and commands registered.');
 }
 
-// Deactivate Extension
-export function deactivate() { }
+export function deactivate() {}

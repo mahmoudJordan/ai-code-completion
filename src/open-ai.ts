@@ -17,7 +17,7 @@ export async function fetchOpenAICompletion(prompt: string): Promise<string> {
             model: 'gpt-3.5-turbo',
             messages: [
                 { role: 'system', content: 'You are a code generator. Always respond with code only, no explanations or markdown.' },
-                { role: 'user', content: `Complete the following code (the completion should not duplicate the code segments):\n\n${prompt}` },
+                { role: 'user', content: `Complete the following code (the completion should from the last character):\n\n${prompt}` },
             ],
             max_tokens: 150,
             temperature: 0.5,
@@ -40,19 +40,19 @@ export async function fetchOpenAICompletion(prompt: string): Promise<string> {
         throw new Error('Failed to fetch OpenAI completion');
     }
 }
-
 /**
- * Fetch code suggestion from OpenAI API based on a natural language comment
+ * Fetch code suggestion from OpenAI API based on a natural language comment and context
  * @param comment The user's comment in natural language
+ * @param context The code context preceding the comment
  * @returns The generated code suggestion
  */
-export async function fetchCodeForComment(comment: string): Promise<string> {
+export async function fetchCodeForComment(comment: string, context: string): Promise<string> {
     try {
         const response = await openai.chat.completions.create({
             model: 'gpt-3.5-turbo',
             messages: [
-                { role: 'system', content: 'You are a helpful code assistant. Generate code based on natural language descriptions.' },
-                { role: 'user', content: `Generate code for the following comment:\n\n${comment}` },
+                { role: 'system', content: 'You are a helpful code assistant. Generate code based on natural language descriptions and provided context.' },
+                { role: 'user', content: `Context:\n${context}\n\nComment:\n${comment}\n\nGenerate the next block of code:` },
             ],
             max_tokens: 200,
             temperature: 0.7,
@@ -70,3 +70,4 @@ export async function fetchCodeForComment(comment: string): Promise<string> {
         throw new Error('Failed to fetch code suggestion for comment');
     }
 }
+
