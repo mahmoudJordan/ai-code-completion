@@ -1,5 +1,6 @@
 import { OpenAI } from 'openai';
-import config from './config';
+import config from '../config';
+import { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 
 // Initialize OpenAI configuration
 const openai = new OpenAI({
@@ -40,6 +41,50 @@ export async function fetchOpenAICompletion(prompt: string): Promise<string> {
         throw new Error('Failed to fetch OpenAI completion');
     }
 }
+
+
+let conversationHistory: ChatCompletionMessageParam[] = [
+    { role: 'system', content: 'You are a helpful assistant. Always provide concise and accurate answers. If your answer includes code, wrap it with <pre><code> and </code></pre>.' }
+];
+
+/**
+ * Reply to the user's message while maintaining context
+ * @param prompt The user's input
+ * @returns The assistant's response
+ */
+export async function replyMessage(prompt: string): Promise<string> {
+    try {
+        // Add the user's message to the conversation history
+        conversationHistory.push({ role: 'user', content: prompt });
+
+        // Make the API call with the entire conversation history
+        const response = await openai.chat.completions.create({
+            model: 'gpt-3.5-turbo',
+            messages: conversationHistory,
+            max_tokens: 150,
+            temperature: 0.5,
+        });
+
+
+
+        // Extract the assistant's response
+        let completion = response.choices[0]?.message?.content?.trim() || '';
+
+        // Sanitize: Remove markdown formatting and code block wrappers
+        completion = completion.replace(/```[\s\S]*?\n/g, '<pre><code>').replace(/```/g, '</code></pre>');
+
+        // Add the assistant's response to the conversation history
+        conversationHistory.push({ role: 'assistant', content: completion });
+
+        return completion;
+    } catch (error) {
+        console.error('Error fetching OpenAI completion:', error);
+        throw new Error('Failed to fetch OpenAI completion');
+    }
+}
+
+
+
 /**
  * Fetch code suggestion from OpenAI API based on a natural language comment and context
  * @param comment The user's comment in natural language

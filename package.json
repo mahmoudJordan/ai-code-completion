@@ -19,6 +19,7 @@
     "onLanguage:cpp",
     "onLanguage:go",
     "onLanguage:php"
+
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -30,7 +31,21 @@
       "command": "extension.triggerInlineSuggestion",
       "key": "alt+s",
       "when": "editorTextFocus"
-    }]
+    }],
+    "viewsContainers": {
+      "activitybar": [{
+        "id": "chatgpt",
+        "title": "ChatGPT",
+        "icon": "/src/resources/icons8-chatgpt-48.svg"
+      }]
+    },
+    "views": {
+      "chatgpt": [{
+        "type": "webview",
+        "id": "chatgpt.chatView",
+        "name": "Chat Assistant"
+      }]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
