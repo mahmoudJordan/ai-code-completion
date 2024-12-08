@@ -42,7 +42,7 @@
 
 Below is an example of how the ChatGPT message box looks in action:
 
-![ChatGPT Message Box Example](chatgpt-message-box-example.gif)
+![ChatGPT Message Box Example](https://github.com/mahmoudJordan/ai-code-completion/blob/de198d02c602cd15a173bd1f8f0a04adec9d1615/illust.gif)
 
 ---
 
