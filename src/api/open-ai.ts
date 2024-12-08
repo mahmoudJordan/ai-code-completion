@@ -35,6 +35,9 @@ export async function fetchOpenAICompletion(prompt: string): Promise<string> {
             completion = completion.slice(prompt.trim().length).trim();
         }
 
+
+        console.log('return suggestion');
+
         return completion;
     } catch (error) {
         console.error('Error fetching OpenAI completion:', error);
