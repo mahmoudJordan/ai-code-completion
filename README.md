@@ -1,71 +1,119 @@
-# chatgpt README
 
-This is the README for your extension "chatgpt". After writing up a brief description, we recommend including the following sections.
+# GPT Code Helper VS Code Extension
 
-## Features
-
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+**GPT Code Helper** is a powerful VS Code extension that integrates OpenAI's GPT to assist developers with inline code suggestions, comment-based code generation, and a ChatGPT-like message box. This extension enhances your coding experience by providing contextual code completions and interactive assistance.
 
 ---
 
-## Following extension guidelines
+## Features
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+1. **Inline Code Suggestions**
+   - Get context-aware code completions while typing.
+   - Suggestions trigger automatically when typing or can be invoked based on certain conditions.
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+2. **Comment-to-Code Generation**
+   - Write comments to describe what you want, and press `Enter` to generate the corresponding code snippet.
+   - Supports single-line (`//`, `#`) and multi-line (`/* */`) comments.
 
-## Working with Markdown
+3. **ChatGPT Message Box**
+   - Access a dedicated ChatGPT-like interface within VS Code.
+   - Ask coding questions, request explanations, or interactively debug your code.
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+---
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+## Usage
 
-## For more information
+### Inline Code Suggestions
+1. Start typing your code, and suggestions will appear after 3+ characters on the current line.
+2. Suggestions can also be manually invoked by writing comments.
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+### Comment-to-Code Generation
+1. Write a comment describing the functionality you need (e.g., `// Generate a function to calculate the sum of an array`).
+2. Press `Enter`, and the extension will generate the corresponding code.
 
-**Enjoy!**
+### ChatGPT Message Box
+1. Open the ChatGPT Message Box from the sidebar.
+2. Ask your questions or describe the functionality you're seeking assistance with.
+3. View the response and apply suggestions directly to your code.
+
+---
+
+## Illustration
+
+Below is an example of how the ChatGPT message box looks in action:
+
+![ChatGPT Message Box Example](chatgpt-message-box-example.gif)
+
+---
+
+## Installation
+
+1. **Install from VS Code Marketplace**
+   - Visit the [VS Code Marketplace](https://marketplace.visualstudio.com/) and search for "GPT Code Helper".
+   - Click "Install" to add it to your VS Code.
+
+2. **Clone and Build**
+   - Clone the repository:
+     ```bash
+     git clone https://github.com/your-username/gpt-code-helper
+     cd gpt-code-helper
+     ```
+   - Install dependencies:
+     ```bash
+     npm install
+     ```
+   - Build the extension:
+     ```bash
+     npm run build
+     ```
+   - Run the extension in a development VS Code instance:
+     ```bash
+     code .
+     ```
+
+---
+
+## Development
+
+### Folder Structure
+- `src/`: Source code for the extension.
+  - `api/`: API integrations for OpenAI.
+  - `providers/`: Logic for inline suggestions and comment completions.
+- `package.json`: Extension metadata and dependencies.
+
+### Debugging
+1. Open the repository in VS Code.
+2. Press `F5` to launch the extension in a new Extension Development Host window.
+
+---
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+1. Fork the repository.
+2. Create a new branch:
+   ```bash
+   git checkout -b feature-name
+   ```
+3. Commit your changes:
+   ```bash
+   git commit -m "Add feature name"
+   ```
+4. Push your branch:
+   ```bash
+   git push origin feature-name
+   ```
+5. Open a pull request.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## Acknowledgements
+
+- [VS Code API](https://code.visualstudio.com/api)
+- [OpenAI](https://platform.openai.com/)
