@@ -46,11 +46,8 @@
 
 ## Installation
 
-1. **Install from VS Code Marketplace**
-   - Visit the [VS Code Marketplace](https://marketplace.visualstudio.com/) 
-   - Click "Install" to add it to your VS Code.
 
-2. **Clone and Build**
+**Clone and Build**
    - Clone the repository:
      ```bash
      git clone https://github.com/your-username/gpt-code-helper
