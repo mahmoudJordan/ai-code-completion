@@ -12,16 +12,34 @@ class GPTInlineCompletionProvider implements vscode.InlineCompletionItemProvider
         token: vscode.CancellationToken
     ): Promise<vscode.InlineCompletionList> {
         const textBeforeCursor = document.getText(new vscode.Range(new vscode.Position(0, 0), position));
+        const currentLineText = document.lineAt(position.line).text.trim();
 
-        // Only trigger on explicit invocation or after typing delay
+        // Skip if the current line is a comment
+        if (currentLineText.startsWith('//') || currentLineText.startsWith('#') || currentLineText.startsWith('/*') || currentLineText.endsWith('*/')) {
+            console.log('Skipping suggestion - current line is a comment.');
+            return new vscode.InlineCompletionList([]);
+        }
+
+        // Skip if the current line has fewer than 3 characters
+        if (currentLineText.length < 3) {
+            const previousLine = position.line > 0 ? document.lineAt(position.line - 1).text.trim() : '';
+            const isPreviousLineComment = previousLine.startsWith('//') || previousLine.startsWith('#') || previousLine.startsWith('/*') || previousLine.endsWith('*/');
+
+            if (!isPreviousLineComment) {
+                console.log('Skipping suggestion - less than 3 characters on the current line and previous line is not a comment.');
+                return new vscode.InlineCompletionList([]);
+            }
+
+            console.log('Previous line is a comment. Proceeding to fetch suggestions.');
+        }
+
+        // Trigger inline completion
         if (context.triggerKind === vscode.InlineCompletionTriggerKind.Invoke || !this.suggestionActive) {
             return new Promise((resolve) => {
-                // Clear any existing timeout
                 if (this.typingTimeout) {
                     clearTimeout(this.typingTimeout);
                 }
 
-                // Set a new timeout for 1 second
                 this.typingTimeout = setTimeout(async () => {
                     if (this.suggestionActive) {
                         resolve(new vscode.InlineCompletionList([]));

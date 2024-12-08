@@ -11,32 +11,29 @@ export function registerCommentCompletionListener(context: vscode.ExtensionConte
         if (!editor || editor.document !== event.document) return;
 
         const position = editor.selection.active;
-        const previousLine = position.line > 0 ? editor.document.lineAt(position.line).text.trim() : '';
+        const previousLine = position.line > 0 ? editor.document.lineAt(position.line - 1).text.trim() : '';
         const isSingleLineComment = previousLine.startsWith('//') || previousLine.startsWith('#');
         const isMultiLineCommentClosed = previousLine.endsWith('*/');
 
-        if (isSingleLineComment || isMultiLineCommentClosed) {
+        // Trigger only if Enter was pressed after a comment
+        if (event.contentChanges.some(change => change.text === '\n') && (isSingleLineComment || isMultiLineCommentClosed)) {
             console.log(`Comment detected: "${previousLine}", fetching suggestion...`);
 
             try {
                 const codeBeforeComment = editor.document.getText(
-                    new vscode.Range(new vscode.Position(0, 0), new vscode.Position(position.line, 0))
+                    new vscode.Range(new vscode.Position(0, 0), new vscode.Position(position.line - 1, previousLine.length))
                 );
 
                 // Fetch suggestion based on the comment and the context
                 const suggestion = await fetchCodeForComment(previousLine, codeBeforeComment);
 
-                // Trim and align the suggestion
+                // Add the suggestion directly to the editor
                 const trimmedSuggestion = suggestion.trimStart();
+                await editor.edit(editBuilder => {
+                    editBuilder.insert(position, `\n${trimmedSuggestion}`);
+                });
 
-                // Trigger inline suggestion explicitly
-                const completionItem = new vscode.InlineCompletionItem(trimmedSuggestion);
-                completionItem.range = new vscode.Range(position, position);
-
-                // Register inline completion
-                await vscode.commands.executeCommand('editor.action.inlineSuggest.trigger');
-
-                console.log('Suggestion successfully displayed.');
+                console.log('Suggestion successfully inserted.');
             } catch (error) {
                 console.error('Error fetching suggestion for comment:', error);
             }
